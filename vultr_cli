@@ -1,0 +1,10 @@
+#!/usr/bin/python
+
+import sys
+import os
+
+from vultr.App import App as app
+
+if __name__ == "__main__":
+	vultr = app(sys.argv[1:])
+	vultr.run()
