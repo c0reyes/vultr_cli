@@ -4,14 +4,15 @@ import json
 import os
 
 class Vultr():
-	def __init__(self):
+	def __init__(self, path=""):
 		self.conf = "{}/.vultr/config".format(os.path.expanduser("~"))
-
+		self.path = path
+		
 		self.config = configparser.ConfigParser()
 		self.config.sections()
 		self.config.read(self.conf)
 
-		self.url_base = "https://api.vultr.com"
+		self.url_base = "https://api.vultr.com/v1"
 		self.timeout = 60
 		self.headers = {"API-Key":self.config["main"]["key"]}
 
@@ -24,6 +25,16 @@ class Vultr():
 			500:"Internal server error. Try again at a later time.",
 			503:"Rate limit hit. API requests are limited to an average of 2/s. Try your request again later."
 		}
+
+	def __getattr__(self, attrname):
+		path = self.path + "/" + attrname
+		return Vultr(path)
+
+	def __call__(self, verbose=False, **kwargs):
+		if kwargs:
+			return self.post(self.path, data=kwargs, verbose=verbose)
+		else:
+			return self.get(self.path, verbose=verbose)
 
 	def get(self, path, payload=None, verbose=False):
 		url = "{}{}".format(self.url_base, path)
